@@ -1,0 +1,16 @@
+name: drogue
+description: A simple command-line application.
+version: 1.0.0
+publish_to: none
+# homepage: https://www.example.com
+
+environment:
+  sdk: '>=2.16.0 <3.0.0'
+
+
+dependencies:
+  dcurses:
+    git: https://github.com/Kibibibit/dcurses
+
+dev_dependencies:
+  lints: ^1.0.0
