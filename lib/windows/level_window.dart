@@ -10,7 +10,7 @@ class LevelWindow extends Window {
   
   @override
   void onDraw() {
-    LevelGenData level = LevelGenData(35,35);
+    LevelGenData level = LevelGenData(35,35,bossRoomSize: Vector(10,10));
     level.generate();
 
     for (int y = 0; y < level.height; y++) {
@@ -30,6 +30,9 @@ class LevelWindow extends Window {
           charCode = 0x2593;
         } else if (tile == tileDoor) {
           charCode = 0x259A;
+        } else if (tile == tileBossDoor) {
+          charCode = 0x259A;
+          mods=[Modifier.fg(Colour.red)];
         }
 
         Ch ch = Ch(charCode, mods);

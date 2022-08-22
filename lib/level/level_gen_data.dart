@@ -21,7 +21,9 @@ class LevelGenData {
 
   final Map<int, Set<Vector>> tiles = {};
 
-  void Function(int width, int height, List<List<int>> data)? startingDefinition;
+  Vector? bossRoomSize;
+
+  final List<Vector> bossRoom = [];
 
   LevelGenData(this.width, this.height, {
     this.seed, 
@@ -29,11 +31,12 @@ class LevelGenData {
     this.maxRoomWidth = 8,
     this.minRoomHeight = 3,
     this.maxRoomHeight = 8,
-    this.roomDensity = 75,
-    this.conformity = 2,
+    this.roomDensity = 50,
+    this.conformity = 0,
     this.minLoopLength = 14,
-    this.startingDefinition
+    this.bossRoomSize
   }) {
+    random = Random(seed);
     data = List.generate(height, (y) => List.generate(width, (x) {
       int tile = x == 0 || x == width-1 || y == 0 || y == height-1 ? tileAdj : tileWall;
       return tile;
@@ -41,7 +44,6 @@ class LevelGenData {
 
     ));
     
-    startingDefinition?.call(width,height,data);
 
     for (int x = 0; x < width; x ++) {
       for (int y = 0; y < height; y++) {
@@ -49,7 +51,7 @@ class LevelGenData {
       }
     }
 
-    random = Random(seed);
+    
   }
 
   int getTile(Vector v) {
@@ -88,6 +90,9 @@ class LevelGenData {
 
   void _generateRooms() {
 
+    bool bossRoomPlaced = false;
+    bossRoomSize ??= Vector(maxRoomWidth, maxRoomHeight);
+
     for (int iter = 0; iter < roomDensity; iter++) {
 
       int x = random.nextInRange(1, width-1);
@@ -95,6 +100,11 @@ class LevelGenData {
 
       int w = random.nextInRange(minRoomWidth, maxRoomWidth);
       int h = random.nextInRange(minRoomHeight, maxRoomHeight);
+
+      if (!bossRoomPlaced) {
+        w = bossRoomSize!.x;
+        h = bossRoomSize!.y;
+      }
 
       bool valid = true;
 
@@ -112,19 +122,33 @@ class LevelGenData {
       }
 
       if (!valid) {
+        if (!bossRoomPlaced) {
+          iter--;
+        }
         continue;
       }
 
+      
+
       for (int xx = x-1; xx < x+w+1; xx++) {
         for (int yy = y-1; yy < y+h+1; yy++) {
+          
+          if (!bossRoomPlaced) {
+            bossRoom.add(Vector(xx,yy));
+          }
 
           if (xx == x-1 || xx == x+w || yy == y-1 || yy == y+h) {
             addTile(Vector(xx,yy), tileAdj);
           } else {
             addTile(Vector(xx,yy), tileFloor);
           }
+          
 
         }
+      }
+
+      if (!bossRoomPlaced) {
+        bossRoomPlaced = true;
       }
 
     }
@@ -396,6 +420,13 @@ class LevelGenData {
 
     for (Vector t in tiles) {
       addTile(t, tileWall);
+    }
+
+    List<Vector> doors = tilesOf(tileDoor).toList();
+    for (Vector d in doors) {
+      if (bossRoom.contains(d)) {
+        addTile(d, tileBossDoor);
+      }
     }
   }
 
